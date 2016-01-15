@@ -150,3 +150,217 @@ require get_template_directory() . '/inc/customizer.php';
  * Load Jetpack compatibility file.
  */
 require get_template_directory() . '/inc/jetpack.php';
+
+
+
+add_action('init', 'create_post_type');
+
+/**
+ * add new post type of restaurants
+ * 
+ */
+function create_post_type() {
+    $labels = array(
+        'name' => 'Restaurants',
+        'singular_name' => 'Restaurants',
+        'slug' => 'restaurants',
+        'menu_name' => 'Restaurants',
+        'parent_item_colon' => 'Parent Restaurants',
+        'all_items' => 'All Restaurants',
+        'view_item' => 'View Restaurants',
+        'add_new_item' => 'Add New Restaurants',
+        'add_new' => 'Add New',
+        'edit_item' => 'Edit Restaurants',
+        'update_item' => 'Update Restaurants',
+        'search_items' => 'Search Restaurants',
+        'not_found' => 'Not Found',
+        'not_found_in_trash' =>'Not found in Trash',
+    );
+    register_post_type('restaurants', array(
+        'public' => true,
+        'taxonomies' => array(
+            'restaurants_type',
+            'food_type'
+        ),
+        'label' => 'Restaurants',
+        'labels' => $labels,
+        'hierarchical' => false,
+        'public' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'show_in_nav_menus' => true,
+        'show_in_admin_bar' => true,
+        'menu_position' => 5,
+        'can_export' => true,
+        'has_archive' => true,
+        'exclude_from_search' => false,
+        'publicly_queryable' => true,
+        'capability_type' => 'page',
+        
+            )
+    );
+}
+
+add_action('init','reg_taxonomy');
+
+/**
+ * register two new texonomy to post type restaurants
+ */
+function reg_taxonomy(){
+    register_taxonomy('restaurants_type','restaurants',
+            array(
+            'show_ui' => true,
+	    'show_admin_column' => true,
+            'label' => 'Restaurant Type'
+            )
+    );
+    register_taxonomy('food_type','restaurants'
+             ,array(
+            'show_ui' => true,
+	    'show_admin_column' => true,
+            'label' => 'Food Type'
+            )
+    );
+}
+
+add_action('load-post.php','Address_metapost');
+add_action('load-post-new.php','Address_metapost');
+
+/**
+ * add and saves new meta boxes
+ */
+function Address_metapost(){
+    add_action('add_meta_boxes','add_address');
+    add_action('save_post','save_address');
+}
+
+/**
+ * Saves or Update address postmeta 
+ * 
+ * @param int $post_id  
+ */
+function save_address($post_id) {
+    if(isset($_POST['restaurant_address'])){
+        $address=$_POST['restaurant_address'];
+        update_post_meta($post_id, '_restaurant_address', $address);
+    }
+}
+
+/**
+ * add new meta box of address for restaurants post type
+ */
+function add_address(){
+    add_meta_box(
+           'restaurants-address',
+            esc_html__('Address','Address'),
+            'add_address_meta_box',
+            'restaurants',
+            'side',
+            'default'
+    );
+}
+
+/**
+ * display/add meta box on restaurants post
+ */
+function add_address_meta_box($post) {
+    $restaurant_add = "";
+    $val = get_post_meta($post -> ID, '_restaurant_address', true);
+    if ($val != NULL && !empty ($val)) {
+        $restaurant_add = $val;
+    }
+    echo "<input type='textarea' id='address' value='" . $restaurant_add . "' name='restaurant_address' />";
+}
+
+add_action('load-post.php','Timing_metapost');
+add_action('load-post-new.php','Timing_metapost');
+
+/**
+ * add and save timing meta post for restaurant post type
+ */
+function Timing_metapost(){
+    add_action('add_meta_boxes','add_timing');
+    add_action('save_post','save_timing');
+}
+
+/**
+ * add meta box for timing
+ */
+function add_timing(){
+    add_meta_box(
+           'restaurants-timing',
+            esc_html__('Timing & Working Days','Timing & Working Days'),
+            'add_timing_meta_box',
+            'restaurants',
+            'side',
+            'default'
+    );
+}
+
+/**
+ * add timing meta box on restaurant post display
+ * @param int $post
+ */
+function add_timing_meta_box( $post ) {
+    ?>
+    <form name="restaurant_timing">
+            <table style="font-size: 12px;margin:auto">
+                <tr style="text-align: center;font-size: 12px; font-weight: bold">
+                    <td>Day</td>
+                    <td>From</td>
+                    <td>To</td>
+                </tr>
+               <?php
+                $time = get_post_meta( $post->ID, '_timing', true );
+                
+                $days = array("mon" => "Monday", "tue" => "Tuesday", "wed" => "Wednesday", "thu" => "Thursday", "fri" => "Friday", "sat" => "Saturday", "sun" => "Sunday");
+                foreach ($days as $key => $day ) {
+                        $am = $pm = "";
+                    if ( !empty( $time ) && is_array( $time ) ) {
+                        if ($time[0][$key][0] != NULL) {
+                            $am = $time[0][$key][0] ;
+                        }
+                        if ($time[0][$key][1] != NULL) {
+                            $pm = $time[0][$key][1];
+                        }
+                    }
+                    echo "<tr><td name=" . $day . ">" . $day . "</td>";
+                    echo "<td><input type='text' name='time[" . $key . "][]' size='3' value='".$am."'>AM</td>";
+                    echo "<td><input type='text' name='time[" . $key . "][]' size='3' value='".$pm."'>PM</td></tr>";
+                }
+                ?>
+            </table>
+        </form>
+<?php
+}
+
+/**
+ * save timing postmeta for restaurant
+ * @param int $post_id
+ */
+function save_timing($post_id) {
+    if (isset($_POST['time'])) {
+        $time=array($_POST['time']);
+        update_post_meta($post_id, '_timing', $time);
+        $close_days = array();
+        $i=0;
+        foreach ($time[0] as $key => $day) {
+            if ($day[0] == NULL && $day[1] == NULL) {
+                $close_days[$i++]=($key);
+            }
+        }
+            update_post_meta( $post_id, '_close_days', $close_days );
+    }   
+}
+
+add_action('wp_enqueue_scripts', 'add_css');
+
+/**
+ * enqueue css for restaurant post type
+ */
+function add_css(){
+    wp_enqueue_style("restaurants_css", '/css/restaurant.css');
+}
+
+?>
+
