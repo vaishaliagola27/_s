@@ -359,7 +359,7 @@ add_action('wp_enqueue_scripts', 'add_css');
  * enqueue css for restaurant post type
  */
 function add_css(){
-    wp_enqueue_style("restaurants_css", '/css/restaurant.css');
+    wp_enqueue_style("restaurants_css", get_template_directory_uri(). '/restaurant.css');
 }
 
 ?>

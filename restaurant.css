@@ -1,0 +1,60 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 18 Jan, 2016, 2:14:22 PM
+    Author     : rtcamp
+*/
+
+
+root { 
+    display: block;
+}
+
+.labels{
+  color:black;
+  font-size:20px;
+  margin-bottom: -0.2%;
+}
+
+.data{
+  margin-left:3%;
+  font-family: Verdana;
+  font-size:13px;
+}
+
+.timing_table {
+  border:none;
+  width:20%;
+}
+
+.timing_table tr td{
+  border:none;
+  padding: -1px -10px 0px 0px;
+  margin: auto;
+  
+}
+
+.timing_table #timing_title{
+  font-weight: 28px;
+  border-bottom-style:ridge;
+  color: black;
+  font-size:16px;
+}
+
+.timing_table .timing_data{
+  font-size:13px;
+}
+
+.data>li
+{
+  text-decoration: none;
+  margin-left:-2%;
+}
+.timing_table .timing_data .close{
+  text-align: center;
+  font-style: oblique;
+  font-weight: bold;
+} 
