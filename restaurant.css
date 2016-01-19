@@ -58,3 +58,11 @@ root {
   font-style: oblique;
   font-weight: bold;
 } 
+
+#review_area{
+  width:50%;
+}
+
+.comments-title{
+  font-size: 20px;
+}

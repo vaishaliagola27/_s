@@ -182,6 +182,7 @@ function create_post_type() {
             'restaurants_type',
             'food_type'
         ),
+        'supports' => array('title','comments','editor'),
         'label' => 'Restaurants',
         'labels' => $labels,
         'hierarchical' => false,
@@ -362,5 +363,115 @@ function add_css(){
     wp_enqueue_style("restaurants_css", get_template_directory_uri(). '/restaurant.css');
 }
 
-?>
+/**
+ * Review field add, save review and display review
+ */
+
+add_filter('comment_form_defaults','default_fields');
+function default_fields() {
+    $default ['comment_field' ] = '<p class="comment-form-comment"><label for="Review">' . _x( 'Review', 'noun' ) . '</label> <br />'
+                                 . '<textarea id="review_area" name="comment" cols="20" rows="5" width=50% aria-required="true" required="required"></textarea></p>';
+    $default [ 'title_reply' ] =__( 'Review Us' );
+    $default ['label_submit' ] = __( 'Post Review' ) ;
+    return $default;
+}
+
+add_filter('comment_form_default_fields', 'custom_fields');
+ 
+function custom_fields() {
+      $commenter = wp_get_current_commenter();
+     $req = get_option( 'require_name_email' );
+    $aria_req = ( $req ? " aria-required='true'" : '' );
+
+    $fields[ 'author' ] = '<p class="comment-form-author">'.
+      '<label for="author">' . __( 'Name' ) . '</label>'.
+      ( $req ? '<span class="required">*</span>' : '' ).
+      '<input id="author" name="author" type="text" value="'. esc_attr( $commenter['comment_author'] ) .
+      '" size="30" ' . $aria_req . ' /></p>';
+
+    $fields[ 'email' ] = '<p class="comment-form-email">'.
+      '<label for="email">' . __( 'Email' ) . '</label>'.
+      ( $req ? '<span class="required">*</span>' : '' ).
+      '<input id="email" name="email" type="text" value="'. esc_attr( $commenter['comment_author_email'] ) .
+      '" size="30" ' . $aria_req . ' /></p>';
+
+  return $fields;
+}
+
+add_action( 'comment_form_logged_in_after', 'additional_fields' );
+add_action( 'comment_form_after_fields', 'additional_fields' );
+
+function additional_fields () {
+  echo '<p class="comment-form-rating">'.
+  '<label for="rating">'. __('Rating') . '<span class="required">*</span></label>
+  <span class="commentratingbox">';
+
+    //Current rating scale is 1 to 5.
+    for( $i=1; $i <= 5; $i++ )
+    echo '<span class="commentrating"><input type="radio" name="rating" id="rating" value="'. $i .'"/>'. $i .'</span>';
+
+  echo'</span></p>';
+
+}
+
+// Save the comment meta data along with comment
+
+add_action( 'comment_post', 'save_comment_meta_data' );
+function save_comment_meta_data( $comment_id ) {
+
+  if ( ( isset( $_POST['rating'] ) ) && ( $_POST['rating'] != '') )
+    $rating = wp_filter_nohtml_kses($_POST['rating']);
+  add_comment_meta( $comment_id, 'rating', $rating );
+}
+
+// Add the filter to check whether the comment meta data has been filled
+
+add_filter( 'preprocess_comment', 'verify_comment_meta_data' );
+function verify_comment_meta_data( $commentdata ) {
+  if ( ! isset( $_POST['rating'] ) )
+  wp_die( __( 'Error: You did not add a rating. Hit the Back button on your Web browser and resubmit your comment with a rating.' ) );
+  return $commentdata;
+}
+
+
+// Add an edit option to comment editing screen  
+
+add_action( 'add_meta_boxes_comment', 'extend_comment_add_meta_box' );
+function extend_comment_add_meta_box() {
+    add_meta_box( 'title', __( 'Comment Metadata - Extend Comment' ), 'extend_comment_meta_box', 'comment', 'normal', 'high' );
+}
+
+function extend_comment_meta_box ( $comment ) {
+    $rating = get_comment_meta( $comment->comment_ID, 'rating', true );
+    wp_nonce_field( 'extend_comment_update', 'extend_comment_update', false );
+    ?>
+    <p>
+        <label for="rating"><?php _e( 'Rating: ' ); ?></label>
+      <span class="commentratingbox">
+      <?php for( $i=1; $i <= 5; $i++ ) {
+        echo '<span class="commentrating"><input type="radio" name="rating" id="rating" value="'. $i .'"';
+        if ( $rating == $i ) echo ' checked="checked"';
+        echo ' />'. $i .' </span>';
+        }
+      ?>
+      </span>
+    </p>
+    <?php
+}
+
+// Update comment meta data from comment editing screen 
+
+add_action( 'edit_comment', 'extend_comment_edit_metafields' );
+
+function extend_comment_edit_metafields( $comment_id ) {
+    if( ! isset( $_POST['extend_comment_update'] ) || ! wp_verify_nonce( $_POST['extend_comment_update'], 'extend_comment_update' ) ) return;
+
+  if ( ( isset( $_POST['rating'] ) ) && ( $_POST['rating'] != '') ):
+  $rating = wp_filter_nohtml_kses($_POST['rating']);
+  update_comment_meta( $comment_id, 'rating', $rating );
+  else :
+  delete_comment_meta( $comment_id, 'rating');
+  endif;
+
+}
 

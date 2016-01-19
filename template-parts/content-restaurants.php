@@ -3,14 +3,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-wp_register_script('restaurant-js',get_template_directory_uri().'/js/restaurants.js');
+wp_register_script('restaurant-js', get_template_directory_uri() . '/js/restaurants.js');
 if (is_singular('restaurants')) {
 
     wp_enqueue_script('restaurant-js');
-    
+
 // Same handler function...
     add_action('wp_ajax_my_action', 'ajax_callback');
-    
+
     function ajax_callback() {
         global $wpdb;
         $whatever = intval($_POST['whatever']);
@@ -18,7 +18,9 @@ if (is_singular('restaurants')) {
         echo $whatever;
         wp_die();
     }
+
     global $post;
+    echo "<h1>". get_post($post->ID) ->post_title."</h1>";
     $current_post_address = get_post_meta($post->ID, '_restaurant_address', true);
     echo "<p class='labels'>Address</p>";
     echo "<div class='data'>" . $current_post_address . "</div>";
@@ -26,7 +28,7 @@ if (is_singular('restaurants')) {
     $current_post_timing = get_post_meta($post->ID, '_timing', true);
     $days = array("mon" => "Monday", "tue" => "Tuesday", "wed" => "Wednesday", "thu" => "Thursday", "fri" => "Friday", "sat" => "Saturday", "sun" => "Sunday");
     ?>
-    
+
     <p class="labels">Restaurant Timing</p>
     <table class="timing_table">
         <tr id="timing_title">
@@ -49,31 +51,43 @@ if (is_singular('restaurants')) {
         ?>
     </table>
     <?php
-}
-
-/**
- * prints _restaurant_type taxonomy
- */
-$terms = wp_get_post_terms($post->ID, 'restaurants_type', '');
-if (!is_wp_error($terms) && $terms) {
-    echo "<p class='labels' >Restaurant Type</p>";
-    $term_text = '';
-    foreach ($terms as $term) {
-        $term_text .=$term->name ."<br />";
+    /**
+     * prints _restaurant_type taxonomy
+     */
+    $terms = wp_get_post_terms($post->ID, 'restaurants_type', '');
+    if (!is_wp_error($terms) && $terms) {
+        echo "<p class='labels' >Restaurant Type</p>";
+        $term_text = '';
+        foreach ($terms as $term) {
+            $term_text .=$term->name . "<br />";
+        }
+        echo "<div class='data'>" . $term_text . "</div>";
     }
-    echo "<div class='data'>".$term_text."</div>";
-}
 
-/**
- * prints _food_type taxonomy
- */
-$terms = wp_get_post_terms($post->ID, 'food_type', '');
-if (!is_wp_error($terms) && $terms) {
-    echo "<p class='labels' >Food Type</p>";
-    $term_text = "<ul class='data'>";
-    foreach ($terms as $term) {
-        $term_text .="<li>" . $term->name . "</li>";
+    /**
+     * prints _food_type taxonomy
+     */
+    $terms = wp_get_post_terms($post->ID, 'food_type', '');
+    if (!is_wp_error($terms) && $terms) {
+        echo "<p class='labels' >Food Type</p>";
+        $term_text = "<ul class='data'>";
+        foreach ($terms as $term) {
+            $term_text .="<li>" . $term->name . "</li>";
+        }
+        $term_text.="</ul>";
+        echo $term_text;
     }
-    $term_text.="</ul>";
-    echo $term_text;
-}
+
+    global $post;
+   
+    $comments = get_comments($post->ID);
+    $rating = get_comment_meta($comments[0]->comment_ID, 'rating', true);
+    ?>
+    <label class="rating_display" >Rating</label>
+    <p>
+        <?php
+        echo $rating . '</p>';
+    }
+    
+       
+
