@@ -360,6 +360,8 @@ add_action('wp_enqueue_scripts', 'add_css');
  * enqueue css for restaurant post type
  */
 function add_css(){
+    wp_enqueue_script('jquery');
+    wp_localize_script('jquery', 'ajax_object', admin_url('admin-ajax.php'));
     wp_enqueue_style("restaurants_css", get_template_directory_uri(). '/restaurant.css');
 }
 
@@ -408,7 +410,7 @@ function additional_fields () {
 
     //Current rating scale is 1 to 5.
     for( $i=1; $i <= 5; $i++ )
-    echo '<span class="commentrating"><input type="radio" name="rating" id="rating" value="'. $i .'"/>'. $i .'</span>';
+    echo '<span class="commentrating"><input type="radio" name="rating" id="rating" value="'. $i .'"/> '. $i .'</span>';
 
   echo'</span></p>';
 
@@ -433,6 +435,25 @@ function verify_comment_meta_data( $commentdata ) {
   return $commentdata;
 }
 
+add_filter( 'comment_text', 'modify_comment');
+function modify_comment( $text ){
+
+  $plugin_url_path = WP_PLUGIN_URL;
+
+  if( $commenttitle = get_comment_meta( get_comment_ID(), 'title', true ) ) {
+    $commenttitle = '<strong>' . esc_attr( $commenttitle ) . '</strong><br/>';
+    $text = $commenttitle . $text;
+  } 
+
+  if( $commentrating = get_comment_meta( get_comment_ID(), 'rating', true ) ) {
+      
+    $commentrating = '<p class="comment-rating">  <img src="'. get_template_directory_uri().'/star/'. $commentrating . 'star.png"/><br/>Rating: <strong>'. $commentrating .' / 5</strong></p>';
+    $text = $text . $commentrating;
+    return $text;
+  } else {
+    return $text;
+  }
+}
 
 // Add an edit option to comment editing screen  
 
@@ -475,3 +496,46 @@ function extend_comment_edit_metafields( $comment_id ) {
 
 }
 
+
+//Scripts add
+add_action( 'get_footer', 'javascript_maps');
+
+function javascript_maps(){
+    ?><script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+            <script>
+            initMap();
+    function initMap() {
+        
+      var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 8,
+        center: {lat: -34.397, lng: 150.644}
+      });
+      var geocoder = new google.maps.Geocoder();
+          geocodeAddress(geocoder, map);
+          
+      /*document.getElementById('submit').addEventListener('click', function() {
+        geocodeAddress(geocoder, map);
+      });*/
+    }
+
+    function geocodeAddress(geocoder, resultsMap) {
+      var address = document.getElementById('data_address').textContent;
+      geocoder.geocode({'address': address}, function(results, status) {
+        if (status === google.maps.GeocoderStatus.OK) {
+          resultsMap.setCenter(results[0].geometry.location);
+          var marker = new google.maps.Marker({
+            map: resultsMap,
+            position: results[0].geometry.location
+          });
+        } else {
+          alert('Geocode was not successful for the following reason: ' + status);
+        }
+      });
+    }
+
+        </script>
+<!--        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;"
+        ></script>-->
+     
+        <?php
+    }
