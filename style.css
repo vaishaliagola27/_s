@@ -883,7 +883,7 @@ object {
 }
 
 .gallery-item {
-	display: inline-block;
+	display: none;
 	text-align: center;
 	vertical-align: top;
 	width: 100%;
