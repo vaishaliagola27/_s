@@ -20,12 +20,39 @@ if (is_singular('restaurants')) {
 //    }
 
     global $post;
+    echo "<div class='main_div'>";
     echo "<h1>" . get_post($post->ID)->post_title . "</h1>";
     $current_post_address = get_post_meta($post->ID, '_restaurant_address', true);
     echo "<div class='address'><p class='labels'>Address </p><label id='data_address' value='" . $current_post_address . "'>" . $current_post_address . "</label>";
 
     echo '<div id="map"></div></div>';
+    ?>
+    <p class="labels" id="label_gallery" >Gallery</p>
+    <div class="image-gallery">
 
+        <?php
+        /**
+         * Image gallery display
+         */
+        $args = array(
+            'post_type' => 'attachment',
+            'numberposts' => -1,
+            'post_status' => null,
+            'post_parent' => $post->ID
+        );
+
+        $attachments = get_posts($args);
+        if ($attachments) {
+            foreach ($attachments as $attachment) {
+                echo '<div id="image">';
+                echo wp_get_attachment_image($attachment->ID, 'full');
+                echo '</div>';
+            }
+        }
+        ?>
+    </div>
+
+    <?php
     $current_post_timing = get_post_meta($post->ID, '_timing', true);
     $days = array("mon" => "Monday", "tue" => "Tuesday", "wed" => "Wednesday", "thu" => "Thursday", "fri" => "Friday", "sat" => "Saturday", "sun" => "Sunday");
     ?>
@@ -51,30 +78,6 @@ if (is_singular('restaurants')) {
         }
         ?>
     </table>
-    
-        <div class="image-gallery">
-        <?php
-/**
- * Image gallery display
- */
- $args = array(
-   'post_type' => 'attachment',
-   'numberposts' => -1,
-   'post_status' => null,
-   'post_parent' => $post->ID
-  );
-
-  $attachments = get_posts( $args );
-     if ( $attachments ) {
-        foreach ( $attachments as $attachment ) {
-           echo '<div id="image">';
-           echo wp_get_attachment_image( $attachment->ID, 'full' );
-           echo '</div>';
-          }
-     }
-        ?>
-        </div>
-   
     <?php
     /**
      * prints _restaurant_type taxonomy

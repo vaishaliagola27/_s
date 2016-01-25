@@ -435,7 +435,7 @@ function save_comment_meta_data($comment_id) {
 }
 
 /**
- * Add the filter to check whether the comment meta data has been filled
+ * To check that rating is given or not
  */
 add_filter('preprocess_comment', 'verify_comment_meta_data');
 
@@ -561,6 +561,7 @@ function javascript_maps() {
                 speed: 500,
                 fade: true,
                 cssEase: 'linear',
+                
             });
         });
     </script>
