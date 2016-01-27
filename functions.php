@@ -226,15 +226,19 @@ function reg_taxonomy() {
     );
 }
 
-add_action('load-post.php', 'Address_metapost');
-add_action('load-post-new.php', 'Address_metapost');
+add_action('load-post.php', 'postmeta');
+add_action('load-post-new.php', 'postmeta');
 
 /**
  * add and saves new meta boxes
  */
-function Address_metapost() {
+function postmeta() {
     add_action('add_meta_boxes', 'add_address');
     add_action('save_post', 'save_address');
+    add_action('add_meta_boxes', 'add_contactno');
+    add_action('save_post', 'save_contactno');
+    add_action('add_meta_boxes', 'add_email');
+    add_action('save_post', 'save_email');
 }
 
 /**
@@ -246,6 +250,27 @@ function save_address($post_id) {
     if (isset($_POST['restaurant_address'])) {
         $address = $_POST['restaurant_address'];
         update_post_meta($post_id, '_restaurant_address', $address);
+    }
+}
+/**
+ * Saves or update contact number of restaurant
+ * @param int $post_id
+ */
+function save_contactno($post_id) {
+    if (isset($_POST['restaurant_contactno'])) {
+        $contactno = $_POST['restaurant_contactno'];
+        update_post_meta($post_id, '_restaurant_contactno', $contactno);
+    }
+}
+
+/**
+ * save or update email id of restaurant
+ * @param int $post_id
+ */
+function save_email($post_id) {
+    if (isset($_POST['restaurant_email'])) {
+        $email = $_POST['restaurant_email'];
+        update_post_meta($post_id, '_restaurant_email', $email);
     }
 }
 
@@ -541,6 +566,7 @@ function javascript_maps() {
 
         function geocodeAddress(geocoder, resultsMap) {
             var address = document.getElementById('data_address').textContent;
+            
             geocoder.geocode({'address': address}, function (results, status) {
                 if (status === google.maps.GeocoderStatus.OK) {
                     resultsMap.setCenter(results[0].geometry.location);
