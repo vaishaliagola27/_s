@@ -9,7 +9,7 @@ and open the template in the editor.
 */
 
 
-root { 
+/* root { 
     display: block;
 }
 .main_div{
@@ -121,7 +121,7 @@ root {
 
 
 /*photo gallery */
-.main_div> .labels#label_gallery{
+/* .main_div> .labels#label_gallery{
   float:left;
   text-align: right;
   
@@ -157,4 +157,147 @@ root {
   margin-right: auto;
   
   position: relative;
+}
+
+.main-content{
+  width: 100%;
+  height: auto;
+  border:solid aqua 2px;
+  display: inline-block;
+  position: relative;
+}
+
+.labels{
+  color:#1A609E;
+  font-size:20px;
+  margin-bottom: -0.2%;
+} */
+ html{
+   overflow-x: hidden;
+ }
+.main-content{
+  width: 100%;
+  height: auto;
+  border:solid aqua 2px;
+  display: inline-block;
+  position: relative;
+  clear: both;
+}
+
+.labels{
+  color:#1A609E;
+  font-size:20px;
+  margin-bottom: -0.2%;
+}
+.main-content >header{
+  display: flex;
+  position: relative;
+  height: 50px;
+  width: 100%;
+/*   border:solid -moz-use-text-color 2px; */
+}
+
+.main-content >header #restaurant-title{
+  width: auto;
+  height: auto;
+  font-size: 30px;
+  color: #1879CE;
+}
+.main-content >header #ratting img{
+  margin: 15px;
+  height: 25%;
+  width: auto;
+}
+.main-content >.content{
+  display: inline-block;
+  position: relative;
+}
+.main-content >.content .content-left {
+  width: 50%;
+  display: inline-flex;
+}
+.main-content >.content .content_right {
+  width: 30%;
+    border:solid -moz-use-text-color 2px;
+}
+.main-content >.content .content-left .left{
+  display: inline;
+  position: relative;
+  width: 45%;
+}
+.main-content >.content .content-left .right{
+  width: 55%;
+}
+.main-content> .content .content-left .address{
+  height: auto;
+  width: auto;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.main-content >.content .content-left .left .contact .labels{
+  font-size: 15px;
+}
+
+.main-content >.content .content-left .left .restaurant-type p:nth-of-type(2){
+  margin-top: 5px;
+  margin-left: 15px;
+  font-size: 14px;
+}
+
+.main-content > .content .content-left .left .food-type ul{
+  margin-left: 0px;
+  font-size: 14px;
+}
+
+
+.main-content > .content .content-left .right #map{
+  margin-top: 5%;
+  height: 350px;
+  clear: both; 
+}
+
+.main-content >.content .content-left .right .timing_table{
+  border:none;
+  width: 90%;
+  font-size: 12px;
+}
+
+.timing_table tr td{
+  border:none;
+  padding: -1px -10px 0px 0px;
+  margin: auto;
+  
+}
+
+.timing_table #timing_title{
+  font-weight: 28px;
+  border-bottom-style:ridge;
+  color: black;
+  font-size:16px;
+}
+
+.timing_table .timing_data{
+  font-size:13px;
+}
+
+.timing_table .timing_data .close{
+  text-align: center;
+  font-style: oblique;
+  font-weight: bold;
+} 
+
+.main-content >.content .content_right {
+  display: inline-block;
+  clear: both;
+  position:relative;
+}
+.main-content >.content .content_right .labels{
+  margin-left: 10%;
+}
+.main-content >.content .content_right .image-gallery{
+  width: 90%;
+  float: right; 
+  margin:0 0 0 15px;
+  clear: both;
 }

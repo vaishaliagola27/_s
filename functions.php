@@ -226,53 +226,18 @@ function reg_taxonomy() {
     );
 }
 
-add_action('load-post.php', 'postmeta');
-add_action('load-post-new.php', 'postmeta');
+add_action('load-post.php', 'rt_restaurant_address_postmeta');
+add_action('load-post-new.php', 'rt_restaurant_address_postmeta');
+
 
 /**
  * add and saves new meta boxes
  */
-function postmeta() {
+function rt_restaurant_address_postmeta() {
     add_action('add_meta_boxes', 'add_address');
     add_action('save_post', 'save_address');
-    add_action('add_meta_boxes', 'add_contactno');
-    add_action('save_post', 'save_contactno');
-    add_action('add_meta_boxes', 'add_email');
-    add_action('save_post', 'save_email');
 }
 
-/**
- * Saves or Update address postmeta 
- * 
- * @param int $post_id  
- */
-function save_address($post_id) {
-    if (isset($_POST['restaurant_address'])) {
-        $address = $_POST['restaurant_address'];
-        update_post_meta($post_id, '_restaurant_address', $address);
-    }
-}
-/**
- * Saves or update contact number of restaurant
- * @param int $post_id
- */
-function save_contactno($post_id) {
-    if (isset($_POST['restaurant_contactno'])) {
-        $contactno = $_POST['restaurant_contactno'];
-        update_post_meta($post_id, '_restaurant_contactno', $contactno);
-    }
-}
-
-/**
- * save or update email id of restaurant
- * @param int $post_id
- */
-function save_email($post_id) {
-    if (isset($_POST['restaurant_email'])) {
-        $email = $_POST['restaurant_email'];
-        update_post_meta($post_id, '_restaurant_email', $email);
-    }
-}
 
 /**
  * add new meta box of address for restaurants post type
@@ -284,15 +249,88 @@ function add_address() {
 }
 
 /**
+ * Saves or Update address postmeta 
+ * 
+ * @param int $post_id  
+ */
+function save_address($post_id) {
+    if (isset($_POST['restaurant_add'])) {
+        $address = array($_POST['restaurant_add']);
+        update_post_meta($post_id, '_restaurant_address', $address);
+    }
+}
+
+/**
  * display/add meta box on restaurants post
+ * @param array $post
  */
 function add_address_meta_box($post) {
-    $restaurant_add = "";
-    $val = get_post_meta($post->ID, '_restaurant_address', true);
-    if ($val != NULL && !empty($val)) {
-        $restaurant_add = $val;
+    $addr = array("streetAddress" => "Street Address", "addressLocality" => "Locality", "addressRegion" => "Region", "postalCode" => "Postal Code", "addressCountry" => "Country");
+    $add = get_post_meta($post->ID, '_restaurant_address', true);
+    
+    ?>
+    <table class="address_table">
+        <?php 
+       foreach($addr as $key => $value){
+           if ($add != NULL && !empty($add)) {
+                $value = $add[0][$key];    
+           }
+           else
+           {
+               $value='';
+           }
+        echo "\n<tr> \n";
+        echo "<td><label>".$addr[$key]."</label></td>\n";
+        echo "<td>\n<input size=\"15\"type=\"text\" name=restaurant_add[".$key."] value=\"".$value."\" />\n</td> \n";
+        echo "</tr> \n";
+       }
+        ?>
+    </table>
+    <?php
+}
+
+add_action('load-post.php', 'rt_restaurant_contactno_postmeta');
+add_action('load-post-new.php', 'rt_restaurant_contactno_postmeta');
+/**
+ * add and saves new meta box for contact number
+ */
+function rt_restaurant_contactno_postmeta() {
+    add_action('add_meta_boxes', 'add_contactno');
+    add_action('save_post', 'save_contactno');
+}
+
+/**
+ * Saves or update contact number of restaurant
+ * @param int $post_id
+ */
+function save_contactno($post_id) {
+    if (isset($_POST['restaurant_contact_no'])) {
+        $contactno = $_POST['restaurant_contact_no'];
+        update_post_meta($post_id, '_restaurant_contactno', $contactno);
     }
-    echo "<input type='textarea' id='address' value='" . $restaurant_add . "' name='restaurant_address' />";
+}
+
+/**
+ * add new meta box for contact number
+ */
+function add_contactno() {
+    add_meta_box(
+            'restaurants-contactno', esc_html__('Contact no.', 'Contact no.'), 'add_contactno_meta_box', 'restaurants', 'side', 'default'
+    );
+}
+
+
+/**
+ * display/add meta box on restaurants post
+ * @param array $post
+ */
+function add_contactno_meta_box($post) {
+    $restaurant_contact = "";
+    $val = get_post_meta($post->ID, '_restaurant_contactno', true);
+    if ($val != NULL && !empty($val)) {
+        $restaurant_contact = $val;
+    }
+    echo "<input type='text' id='contact-no' value='" . $restaurant_contact . "' name='restaurant_contact_no' />";
 }
 
 add_action('load-post.php', 'Timing_metapost');
@@ -547,7 +585,8 @@ function extend_comment_edit_metafields($comment_id) {
 add_action('get_footer', 'javascript_maps');
 
 function javascript_maps() {
-    ?><script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    ?>
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
     <script>
         initMap();
         function initMap() {
@@ -580,14 +619,15 @@ function javascript_maps() {
             });
         }
         //Slick for slideshow
+        
         jQuery(document).ready(function () {
+            alert("hello");
             jQuery('.image-gallery').slick({
                 dots: true,
                 infinite: true,
                 speed: 500,
                 fade: true,
                 cssEase: 'linear',
-                
             });
         });
     </script>
