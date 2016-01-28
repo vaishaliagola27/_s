@@ -9,33 +9,28 @@ if (is_singular('restaurants')) {
 ?>
 <article class="main-content" itemscope itemtype="http://schema.org/Restaurant">
     <header>
+        <!-- Display Restaurant title -->
         <div id="restaurant-title"><?php echo get_post($post->ID)->post_title ?></div>
+        
+        <!-- Display aggrigate rating for restaurant  -->
         <div id="ratting" itemprop="ratingValue">
-                <?php
-                $comments = get_comments($post->ID);
-                $rating = 0;
-                $cnt = 0;
-                foreach ($comments as $cm) {
-                    $rating+= get_comment_meta($cm->comment_ID, 'rating', true);
-                    $cnt+=1;
+            <?php
+                $rating=get_post_meta($post->ID, '_restaurant_ratting',true);
+                if(!empty($rating) || $rating != NULL){
+                    echo "<img src=\"".get_template_directory_uri() . "/star/" . intval($rating) . "star.png\" />";
                 }
-
-                /**
-                 * Average Rating display
-                 */
-                if ($cnt != 0) {
-                    $rating/=$cnt;
-                    echo '<img src="' . get_template_directory_uri() . '/star/' . intval($rating) . 'star.png"/>';
-                } 
-                ?>
+            ?>
         </div>
     </header>
     <section class="content">
         <div class="content-left">
 <!--             address, contact number, restaurant type, food type -->
             <div class="left">
+                
+                <!-- Display address  -->
                 <div class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">
                     <?php
+                        ob_start();
                         $current_post_address = get_post_meta($post->ID, '_restaurant_address', true); 
                         $addr = array("streetAddress", "addressLocality", "addressRegion", "postalCode", "addressCountry");
                         ?>
@@ -51,7 +46,17 @@ if (is_singular('restaurants')) {
                                 ?>
                             </div>
                             <input type="hidden" value="<?php echo $address; ?>" id="address_value"/>
+                        <?php
+                        $ob_restaurant_address = ob_get_clean();
+                        
+                        //filter for restaurant address html
+                        $ob_restaurant_address = apply_filters('rt_restaurant_address_html', $ob_restaurant_address);
+                        
+                        echo $ob_restaurant_address;
+                        ?>
                 </div>
+                
+                <!-- Display Contact Number -->
                 <div class="contact">
                     <?php $phone_no=get_post_meta($post->ID,'_restaurant_contactno',true); ?>
                     <label class="labels">Contact Us:</label>
@@ -60,10 +65,12 @@ if (is_singular('restaurants')) {
                     </span>
                 </div>
                 
+                <!-- Display Restaurant type -->
                 <div class="restaurant-type">
                     <p class='labels' >Restaurant Type</p>
                     <p>
                     <?php
+                    ob_start();
                     $terms = wp_get_post_terms($post->ID, 'restaurants_type', '');
                     if (!is_wp_error($terms) && $terms) {
                         $term_text = '';
@@ -71,14 +78,22 @@ if (is_singular('restaurants')) {
                             $term_text .=$term->name ."<br />\n";
                         }
                         echo  $term_text;
-                    }            
+                    }      
+                    $ob_restaurant_type = ob_get_clean();
+                        
+                    //filter for restaurant type html
+                    $ob_restaurant_type = apply_filters('rt_restaurant_type_html', $ob_restaurant_type);
+                        
+                    echo $ob_restaurant_type;
                     ?>
                     <p>
                 </div>
                 
+                <!-- Display Food Type -->
                 <div class="food-type">
                     <p class='labels' >Food Type</p>
                     <?php
+                        ob_start();
                         $terms = wp_get_post_terms($post->ID, 'food_type', '');
                         if (!is_wp_error($terms) && $terms) {
                             $term_text = "<ul>";
@@ -88,6 +103,12 @@ if (is_singular('restaurants')) {
                             $term_text.="</ul>";
                             echo $term_text;
                         }
+                        $ob_food_type = ob_get_clean();
+                        
+                        //filter for food type html
+                        $ob_food_type = apply_filters('rt_restaurant_food_type_html', $ob_food_type);
+                        
+                        echo $ob_food_type;
                     ?>
                 </div>
                 
@@ -96,8 +117,10 @@ if (is_singular('restaurants')) {
             <div class="right">
                 <div id="map"></div>
                 
+                <!-- Display Restaurant timing and close days -->
                 <div class="restaurant-timing" itemprop="openingHours">
                     <?php
+                        ob_start();
                         $current_post_timing = get_post_meta($post->ID, '_timing', true);
                         $days = array("mon" => "Monday", "tue" => "Tuesday", "wed" => "Wednesday", "thu" => "Thursday", "fri" => "Friday", "sat" => "Saturday", "sun" => "Sunday");
                     ?>
@@ -127,6 +150,14 @@ if (is_singular('restaurants')) {
                                 }
                                 ?>
                         </table>
+                    <?php
+                        $ob_timing = ob_get_clean();
+                        
+                        //filter for timing table html
+                        $ob_timing = apply_filters('rt_restaurant_timing_table_html', $ob_timing);
+                        
+                        echo $ob_timing;
+                    ?>
                 </div>
                 
             </div>
@@ -137,6 +168,7 @@ if (is_singular('restaurants')) {
             <p class="labels" >Gallery</p>
             <div class="image-gallery">
                     <?php
+                    ob_start();
                     /**
                      * Image gallery display
                      */
@@ -156,6 +188,12 @@ if (is_singular('restaurants')) {
                             <?php
                         }
                     }
+                    $ob_gallery = ob_get_clean();
+                        
+                    //filter for gallery html
+                    $ob_gallery = apply_filters('rt_restaurant_gallery_html', $ob_gallery);
+                        
+                    echo $ob_gallery;
                     ?>
             </div>
         </div>
