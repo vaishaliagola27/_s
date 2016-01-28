@@ -156,31 +156,6 @@ and open the template in the editor.
   width:5%;
 }
 
-.site-branding .site-title{
-  background-image:url(logo.png);
-  background-repeat: no-repeat;
-  font-size: 0px;
-  height: 140px;
-  background-size: 100px auto;
-}
-
-.site-description {
-  display: none;
-}
-.main-navigation{
-  text-decoration: none;
-} 
-#primary-menu .menu-item{
-  background-color: rgba(11,60,99,0.1);
-}
-
-.menu > li a{
-  color: #1A609E;
-  font-size: 20px;
-  margin:0 15px 0 0;
-  font-weight: bold;
-  font-style: italic;
-}
 
 .comments-title{
   color:  #1A609E;
@@ -349,4 +324,50 @@ and open the template in the editor.
   width: auto;
   margin-right:30%;
   max-width: 20%;
+}
+
+#masthead{
+  display:table;
+  position: relative;
+  width: 100%;
+}
+
+#masthead > .site-branding{
+  width: 10%;
+  clear:both;
+}
+#masthead > #site-navigation{
+  margin-top: -5%;
+  width: 45%;
+  float: right;
+  clear: left;
+  margin-left: 0px;
+}
+
+#masthead >.site-branding .site-title{
+  background-image:url(logo.png);
+  background-repeat: no-repeat;
+  font-size: 0px;
+  height: 140px;
+  background-size: 100px auto;
+}
+
+.site-description {
+  display: none;
+}
+
+#masthead > #site-navigation{
+  
+}
+
+#primary-menu .menu-item{
+  background-color: rgba(11,60,99,0.1);
+}
+
+.menu > li a{
+  color: #1A609E;
+  font-size: 20px;
+  margin:0 15px 0 0;
+  font-weight: bold;
+  font-style: italic;
 }
