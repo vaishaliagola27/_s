@@ -358,6 +358,7 @@ function add_timing() {
  * @param int $post
  */
 function add_timing_meta_box($post) {
+    ob_start();
     ?>
     <form name="restaurant_timing">
         <table style="font-size: 12px;margin:auto">
@@ -368,10 +369,9 @@ function add_timing_meta_box($post) {
             </tr>
             <?php
             $time = get_post_meta($post->ID, '_timing', true);
-
             $days = array("mon" => "Monday", "tue" => "Tuesday", "wed" => "Wednesday", "thu" => "Thursday", "fri" => "Friday", "sat" => "Saturday", "sun" => "Sunday");
             foreach ($days as $key => $day) {
-                $am = $pm = "";
+                $am = $pm = NULL;
                 if (!empty($time) && is_array($time)) {
                     if ($time[0][$key][0] != NULL) {
                         $am = $time[0][$key][0];
@@ -380,14 +380,21 @@ function add_timing_meta_box($post) {
                         $pm = $time[0][$key][1];
                     }
                 }
-                echo "<tr><td name=" . $day . ">" . $day . "</td>";
-                echo "<td><input type='text' name='time[" . $key . "][]' size='3' value='" . $am . "'>AM</td>";
-                echo "<td><input type='text' name='time[" . $key . "][]' size='3' value='" . $pm . "'>PM</td></tr>";
+                ?>
+                <tr>
+                    <td name=" <?php echo $day ?> "> <?php echo $day ?> </td>
+                    <td><input type="text" name="<?php echo "time[".$key."][]";?>" size="3" value=" <?php echo $am ?> ">AM</td>
+                    <td><input type="text" name="<?php echo "time[".$key."][]";?>" size="3" value=" <?php echo $pm ?> ">PM</td>
+                </tr>
+            <?php
             }
             ?>
         </table>
     </form>
     <?php
+    $ob_timing_working_days=  ob_get_clean();
+    
+    echo $ob_timing_working_days;
 }
 
 /**
@@ -427,6 +434,9 @@ function add_css_js() {
 
     wp_register_script('jquery-migrate-js', get_template_directory_uri() . '/js/jquery-migrate-1.2.1.min.js');
     wp_enqueue_script('jquery-migrate-js');
+ 
+    wp_register_script('slider-js', get_template_directory_uri() . '/js/restaurants.js');
+    wp_enqueue_script('slider-js');
 }
 
 /**
@@ -508,30 +518,6 @@ function verify_comment_meta_data($commentdata) {
     return $commentdata;
 }
 
-add_filter('comment_text', 'modify_comment');
-/**
- * Display star ratting
- * @param string $text
- * @return string
- */
-function modify_comment($text) {
-
-    $plugin_url_path = WP_PLUGIN_URL;
-
-    if ($commenttitle = get_comment_meta(get_comment_ID(), 'title', true)) {
-        $commenttitle = '<strong>' . esc_attr($commenttitle) . '</strong><br/>';
-        $text = $commenttitle . $text;
-    }
-
-    if ($commentrating = get_comment_meta(get_comment_ID(), 'rating', true)) {
-
-        $commentrating = '<p class="comment-rating">  <img src="' . get_template_directory_uri() . '/star/' . $commentrating . 'star.png"/><br/>Rating: <strong>' . $commentrating . ' / 5</strong></p>';
-        $text = $text . $commentrating;
-        return $text;
-    } else {
-        return $text;
-    }
-}
 
 /**
  *  Add an edit option to comment editing screen  
@@ -587,50 +573,6 @@ add_action('get_footer', 'javascript_maps');
 function javascript_maps() {
     ?>
     <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-    <script>
-        initMap();
-        function initMap() {
-
-            var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 8,
-                center: {lat: -34.397, lng: 150.644}
-            });
-            var geocoder = new google.maps.Geocoder();
-            geocodeAddress(geocoder, map);
-
-            /*document.getElementById('submit').addEventListener('click', function() {
-             geocodeAddress(geocoder, map);
-             });*/
-        }
-
-        function geocodeAddress(geocoder, resultsMap) {
-            var address = document.getElementById('data_address').textContent;
-            
-            geocoder.geocode({'address': address}, function (results, status) {
-                if (status === google.maps.GeocoderStatus.OK) {
-                    resultsMap.setCenter(results[0].geometry.location);
-                    var marker = new google.maps.Marker({
-                        map: resultsMap,
-                        position: results[0].geometry.location
-                    });
-                } else {
-                    alert('Geocode was not successful for the following reason: ' + status);
-                }
-            });
-        }
-        //Slick for slideshow
-        
-        jQuery(document).ready(function () {
-            alert("hello");
-            jQuery('.image-gallery').slick({
-                dots: true,
-                infinite: true,
-                speed: 500,
-                fade: true,
-                cssEase: 'linear',
-            });
-        });
-    </script>
     <?php
 }
 
@@ -640,3 +582,60 @@ function javascript_maps() {
 add_theme_support('post-thumbnails', array('restaurants'));
 set_post_thumbnail_size(50, 50);
 add_image_size('single-post-thumbnail', 400, 9999);
+
+/**
+ * Display review of restaurants
+ * @param array $review
+ * @param string $args
+ * @param int $depth
+ */
+function rt_restaurants_reviews_html($review, $args, $depth){
+    $GLOBALS['comment'] = $review;
+    extract($args, EXTR_SKIP);
+    if ( 'div' == $args['style'] ) {
+		$tag = 'div';
+		$add_below = 'comment';
+	} else {
+		$tag = 'li';
+		$add_below = 'div-comment';
+	}
+    ?>
+    <fieldset id="div-comment-<?php comment_ID() ?>" class="comment-body" itemprop="review" itemscope itemtype="http://schema.org/Review">
+        <legend class="comment-author" itemprop="author">
+            <?php if ( $args['avatar_size'] != 0 ) echo get_avatar( $review, $args['avatar_size'] ); ?>
+            <?php echo  get_comment_author_link() ; ?>
+        </legend>
+        
+        <?php if ( $review->comment_approved == '0' ) : ?>
+		<em class="comment-awaiting-moderation"><?php _e( 'Your comment is awaiting moderation.' ); ?></em>
+		<br />
+	<?php endif; ?>
+
+        <div class="comment-meta commentmetadata" itemprop="datePublished">
+		<?php
+			/* translators: 1: date, 2: time */
+			printf( __('%1$s at %2$s'), get_comment_date(),  get_comment_time() ); ?></a><?php edit_comment_link( __( '(Edit)' ), '  ', '' );
+		?>
+	</div>
+        
+                <div itemprop="description">
+                    <?php echo $review->comment_content; ?>
+                </div>
+                <?php
+                    $commentrating = get_comment_meta(get_comment_ID(), 'rating', true);
+                ?>
+                <p class="comment-rating" itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
+                    <img src="<?php echo get_template_directory_uri() . '/star/' . $commentrating . 'star.png' ; ?>" />
+                    <br/>
+                    Rating: 
+                    <strong itemprop="ratingValue">
+                        <?php echo $commentrating ."\n";?>
+                        / <span itemprop="bestRating">5</span>
+                    </strong>
+                </p>
+        <div class="reply">
+            <?php comment_reply_link( array_merge( $args, array( 'add_below' => $add_below, 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) ); ?>
+	</div>
+    </fieldset>
+    <?php
+}
