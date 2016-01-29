@@ -721,6 +721,7 @@ function rt_restaurant_add_transient_rating($comment_id) {
     $rating = 0;
     $cnt = 0;
     $postid=$comments[0] -> comment_post_ID ;
+    $comments = get_comments($postid);
     foreach ($comments as $cm) {
         $rating+= get_comment_meta($cm->comment_ID, 'rating', true);
         $cnt+=1;
@@ -729,7 +730,7 @@ function rt_restaurant_add_transient_rating($comment_id) {
     $value["postID"] = $postid;
     $value["sum"] = $rating;
     $value["count"] = $cnt;
-    set_transient('rating_sum_count', $value, 0);
-    $rating/=$cnt;
-    update_post_meta($postid, '_restaurant_ratting', $rating);
+    set_transient('_site_transient_rating_sum_count-'.$postid, $value, 0);
+    $rating= $rating / $cnt;
+    update_post_meta($postid, '_restaurant_ratting', intval($rating));
 }
