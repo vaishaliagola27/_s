@@ -12,7 +12,7 @@ if (is_singular('restaurants')) {
         <!-- Display Restaurant title -->
         <div id="restaurant-title"><?php echo get_post($post->ID)->post_title ?></div>
         
-        <!-- Display aggrigate rating for restaurant  -->
+        <!-- Display aggregate rating for restaurant  -->
         <div id="ratting" itemprop="ratingValue">
             <?php
                 $rating=get_post_meta($post->ID, '_restaurant_ratting',true);
@@ -30,6 +30,7 @@ if (is_singular('restaurants')) {
                 <!-- Display address  -->
                 <div class="address" itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">
                     <?php
+                        // Output buffer starts
                         ob_start();
                         $current_post_address = get_post_meta($post->ID, '_restaurant_address', true); 
                         $addr = array("streetAddress", "addressLocality", "addressRegion", "postalCode", "addressCountry");
@@ -37,6 +38,7 @@ if (is_singular('restaurants')) {
                             <p class='labels'>Address </p>
                             <div itemprop = "address" itemscope itemtype = "http://schema.org/PostalAddress">
                             <?php
+                                // Loop for retrive address fields from address array
                                 $address = '';
                                 foreach ($addr as $key) {
                                     ?>
@@ -47,9 +49,20 @@ if (is_singular('restaurants')) {
                             </div>
                             <input type="hidden" value="<?php echo $address; ?>" id="address_value"/>
                         <?php
+                        // Empty output buffer and store it into variable
                         $ob_restaurant_address = ob_get_clean();
                         
-                        //filter for restaurant address html
+                        /**
+                        * Summary.  Filter for changing address html
+                        *
+                        * Description.
+                        *   This filter will allow you to customize the look of address post meta
+                        * 
+                        * @since Unknown
+                        *
+                        * @param string  $var   Description.  Filter name
+                        * @param string  $ob_restaurant_address Description. output string of address html
+                        */
                         $ob_restaurant_address = apply_filters('rt_restaurant_address_html', $ob_restaurant_address);
                         
                         echo $ob_restaurant_address;
@@ -70,6 +83,7 @@ if (is_singular('restaurants')) {
                     <p class='labels' >Restaurant Type</p>
                     <p>
                     <?php
+                    // Output buffer starts
                     ob_start();
                     $terms = wp_get_post_terms($post->ID, 'restaurants_type', '');
                     if (!is_wp_error($terms) && $terms) {
@@ -79,9 +93,20 @@ if (is_singular('restaurants')) {
                         }
                         echo  $term_text;
                     }      
+                    // Empty output buffer dat into variable 
                     $ob_restaurant_type = ob_get_clean();
                         
-                    //filter for restaurant type html
+                        /**
+                        * Summary.  Filter for changing restaurant type html
+                        *
+                        * Description.
+                        *   This filter will allow you to customize the look of restaurant type taxonomy.
+                        * 
+                        * @since Unknown
+                        *
+                        * @param string  $var   Description.  Filter name
+                        * @param string  $ob_restaurant_type Description. output string of restaurant type html
+                        */
                     $ob_restaurant_type = apply_filters('rt_restaurant_type_html', $ob_restaurant_type);
                         
                     echo $ob_restaurant_type;
@@ -93,6 +118,7 @@ if (is_singular('restaurants')) {
                 <div class="food-type">
                     <p class='labels' >Food Type</p>
                     <?php
+                        // Output buffer starts 
                         ob_start();
                         $terms = wp_get_post_terms($post->ID, 'food_type', '');
                         if (!is_wp_error($terms) && $terms) {
@@ -103,9 +129,20 @@ if (is_singular('restaurants')) {
                             $term_text.="</ul>";
                             echo $term_text;
                         }
+                        // Empty output buffer dat into variable 
                         $ob_food_type = ob_get_clean();
                         
-                        //filter for food type html
+                        /**
+                        * Summary.  Filter for changing food type html
+                        *
+                        * Description.
+                        *   This filter will allow you to customize the look of food type taxonomy.
+                        * 
+                        * @since Unknown
+                        *
+                        * @param string  $var   Description.  Filter name
+                        * @param string  $ob_food_type Description. output string of food type html
+                        */
                         $ob_food_type = apply_filters('rt_restaurant_food_type_html', $ob_food_type);
                         
                         echo $ob_food_type;
@@ -120,6 +157,7 @@ if (is_singular('restaurants')) {
                 <!-- Display Restaurant timing and close days -->
                 <div class="restaurant-timing" itemprop="openingHours">
                     <?php
+                        // Output buffer starts
                         ob_start();
                         $current_post_timing = get_post_meta($post->ID, '_timing', true);
                         $days = array("mon" => "Monday", "tue" => "Tuesday", "wed" => "Wednesday", "thu" => "Thursday", "fri" => "Friday", "sat" => "Saturday", "sun" => "Sunday");
@@ -151,9 +189,20 @@ if (is_singular('restaurants')) {
                                 ?>
                         </table>
                     <?php
+                        // Empty output buffer dat into variable 
                         $ob_timing = ob_get_clean();
                         
-                        //filter for timing table html
+                        /**
+                        * Summary.  Filter for changing restaurant time html.
+                        *
+                        * Description.
+                        *   This filter will allow you to customize the look of restaurant time post meta.
+                        * 
+                        * @since Unknown
+                        *
+                        * @param string  $var   Description.  Filter name
+                        * @param string  $ob_timing Description. output string of restaurant timing html
+                        */
                         $ob_timing = apply_filters('rt_restaurant_timing_table_html', $ob_timing);
                         
                         echo $ob_timing;
@@ -168,6 +217,7 @@ if (is_singular('restaurants')) {
             <p class="labels" >Gallery</p>
             <div class="image-gallery">
                     <?php
+                    // Output buffer starts
                     ob_start();
                     /**
                      * Image gallery display
@@ -188,9 +238,20 @@ if (is_singular('restaurants')) {
                             <?php
                         }
                     }
+                    // Empty output buffer dat into variable 
                     $ob_gallery = ob_get_clean();
                         
-                    //filter for gallery html
+                        /**
+                        * Summary.  Filter for changing restaurant image gallery html.
+                        *
+                        * Description.
+                        *   This filter will allow you to customize the look of restaurant image gallery.
+                        * 
+                        * @since Unknown
+                        *
+                        * @param string  $var   Description.  Filter name
+                        * @param string  $ob_gallery Description. output string of restaurant image gallery html
+                        */
                     $ob_gallery = apply_filters('rt_restaurant_gallery_html', $ob_gallery);
                         
                     echo $ob_gallery;

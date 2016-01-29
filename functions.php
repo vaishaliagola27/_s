@@ -156,14 +156,20 @@ require get_template_directory() . '/inc/customizer.php';
 require get_template_directory() . '/inc/jetpack.php';
 
 
+// Custom code starts here
 
 add_action('init', 'rt_restaurant_create_post_type');
 
 /**
- * add new post type of restaurants
+ * Summary. add new post type of restaurants
+ *
+ * Description.
+ *  This function will add one or more custom post types.
  * 
+ * @since Unknown
  */
 function rt_restaurant_create_post_type() {
+    // Array of labels for restaurant post type
     $labels = array(
         'name' => 'Restaurants',
         'singular_name' => 'Restaurants',
@@ -181,14 +187,10 @@ function rt_restaurant_create_post_type() {
         'not_found_in_trash' => 'Not found in Trash',
     );
     
-    //filter for custom post labels
-    $labels=apply_filters('rt_restaurant_add_custom_post_labels', $labels);
-    
+    // Array of current taxonomy of restaurant post type
     $taxonomy=array('restaurants_type','food_type');
     
-    //filter for taxonomies
-    $taxonomy=apply_filters('rt_restaurant_get_taxonomies',$taxonomy);
-    
+    // Array of arguments of custom post type restaurant.
     $args=array(
         'public' => true,
         'taxonomies' => $taxonomy,
@@ -209,21 +211,67 @@ function rt_restaurant_create_post_type() {
         'capability_type' => 'page',
             );
     
-    //filter for custom post type arguments
-    $args=apply_filters('rt_restaurant_custom_post_args',$args);
+    // Array to store new post types for registration.
+    $new_post_types = array('restaurants' => $args );
     
-    register_post_type('restaurants', $args);
+     /**
+     * Summary. Filter for add multiple custom post types.
+     *
+     * Description.
+     *  This filter will allow user to add multiple custom post types at once. USer just need to pass
+      *     name and arguments of custom post types.  
+     * 
+     * @since Unknown
+     *
+     * @param string $var Description. Name of filter
+     * @param array $new_post_types {
+     *     Short description about this hash.
+     *
+     *     @type string $var Description. Name of custom post type.
+     *     @type array  $var Description. Array of arguments of custom post type.
+     * }
+     * @param type  $var Description.
+     */
+    $new_post_types = apply_filters('rt_restaurant_custom_post_type',$new_post_types);
+    
+    // Loop to register all custom post types.
+    foreach($new_post_types as $key => $args){
+        register_post_type( $key , $args);
+    }
+    
 }
 
 add_action('init', 'rt_restaurant_reg_taxonomy');
+
 /**
- * register new texonomy to post type restaurants
+ * Summary. register new texonomy to post type restaurants
+ *
+ * Description.
+ *  This function will register one more taxonomy for custom post type.
+ * 
+ * @since Unknown
  */
 function rt_restaurant_reg_taxonomy() {
+    // Array of taxomy name and label to register.
     $taxonomy = array('restaurants_type' => 'Restaurants Type', 'food_type' => 'Food Type');
     
-    //filter for taxonomies with label
+     /**
+     * Summary. Filter to register more than one taxonomies.
+     *
+     * Description.
+      *     This filter will allow user to register more than 1 taxonomy at a time by giving key and label of each
+      *     taxonomy in array. 
+     *
+     * @since Unknown
+     *
+     * @param string  $var Description. Filter name.
+     * @param array $args {
+     *     @type string $var Description. key for taxonomy
+     *     @type string $var Description. Label for taxonomy
+     * }
+     */
     $taxonomy = apply_filters('rt_restaurant_get_taxonomies_with_label', $taxonomy);
+    
     $post_type = 'restaurants';
 
     foreach ($taxonomy as $name => $label) {
@@ -233,7 +281,17 @@ function rt_restaurant_reg_taxonomy() {
             'label' => $label
         );
         
-        //filter for taxonomy arguments
+        /**
+        * Summary. Filter to change taxonomy arguments
+        *
+        * Description.
+        *   This filter allow user to change taxonomy arguments by passing arguments array in filter.
+        * 
+        * @since Unknown
+        *
+        * @param string $var    Description. Filter name
+        * @param array  $args   Description. Array of arguments for taxonomy
+        */
         $args = apply_filters('rt_restaurant_taxonomy_args', $args);
         
         register_taxonomy($name, $post_type, $args);
@@ -241,19 +299,16 @@ function rt_restaurant_reg_taxonomy() {
 }
 
 
-add_action('load-post.php', 'rt_restaurant_address_postmeta');
-add_action('load-post-new.php', 'rt_restaurant_address_postmeta');
 
+add_action('add_meta_boxes', 'rt_restaurant_add_address');
+add_action('save_post', 'rt_restaurant_save_address');
 /**
- * add and saves new meta boxes
- */
-function rt_restaurant_address_postmeta() {
-    add_action('add_meta_boxes', 'rt_restaurant_add_address');
-    add_action('save_post', 'rt_restaurant_save_address');
-}
-
-/**
- * add new meta box of address for restaurants post type
+ * Summary. add new meta box of address for restaurants post type.
+ *
+ * Description.
+ *  Function to add address meta box.
+ * 
+ * @since Unknown 
  */
 function rt_restaurant_add_address() {
     add_meta_box(
@@ -262,7 +317,13 @@ function rt_restaurant_add_address() {
 }
 
 /**
- * Saves or Update address postmeta 
+ * Summary. Saves or Update address postmeta 
+ *
+ * Description.
+ *  This function will save or update post meta of restaurant address.
+ * 
+ * @since Unknown
+ * 
  * @param int $post_id  
  */
 function rt_restaurant_save_address($post_id) {
@@ -273,12 +334,23 @@ function rt_restaurant_save_address($post_id) {
 }
 
 /**
- * display/add meta box on restaurants post
+ * Summary. display/add meta box on restaurants post.
+ *
+ * Description.
+ *  Function for adding meta box for restaurant address.
+ * 
+ * @since Unknown
+ * 
  * @param array $post
  */
 function rt_restaurant_add_address_meta_box($post) {
+    // output buffer start
     ob_start();
+    
+    // Array for address fields
     $addr = array("streetAddress" => "Street Address", "addressLocality" => "Locality", "addressRegion" => "Region", "postalCode" => "Postal Code", "addressCountry" => "Country");
+    
+    // Retriving address post meta for particular post.
     $add = get_post_meta($post->ID, '_restaurant_address', true);
     
     ?>
@@ -304,25 +376,36 @@ function rt_restaurant_add_address_meta_box($post) {
        ?>
     </table>
     <?php
+    
+    // Get output buffer value into variable and clear output buffer
     $ob_address=  ob_get_clean();
     
-    //filter for address html
+     /**
+     * Summary. Filter for change post meta box display of address post meta.
+     *
+     * Description.
+     *  This filter allow user to change meta box of address post meta by passing output string.
+      * 
+     * @since Unknown
+     *
+     * @param string $var Description. Filter name
+     * @param string $ob_address
+     */
     $ob_address = apply_filters('rt_restaurant_address_html',$ob_address);
     echo $ob_address;
 }
 
-add_action('load-post.php', 'rt_restaurant_contactno_postmeta');
-add_action('load-post-new.php', 'rt_restaurant_contactno_postmeta');
-/**
- * add and saves new meta box for contact number
- */
-function rt_restaurant_contactno_postmeta() {
-    add_action('add_meta_boxes', 'rt_restaurant_add_contactno');
-    add_action('save_post', 'rt_restaurant_save_contactno');
-}
 
+add_action('add_meta_boxes', 'rt_restaurant_add_contactno');
+add_action('save_post', 'rt_restaurant_save_contactno');
+    
 /**
- * Saves or update contact number of restaurant
+ * Summary.Saves or update contact number of restaurant
+ *
+ * Description.
+ *  This function will add or update post meta of contact number of restaurants.
+ * 
+ * @since Unknown
  * @param int $post_id
  */
 function rt_restaurant_save_contactno($post_id) {
@@ -333,7 +416,9 @@ function rt_restaurant_save_contactno($post_id) {
 }
 
 /**
- * add new meta box for contact number
+ * Summary.add new meta box for contact number
+ * 
+ * @since Unknown.
  */
 function rt_restaurant_add_contactno() {
     add_meta_box(
@@ -341,40 +426,55 @@ function rt_restaurant_add_contactno() {
     );
 }
 
-
 /**
- * display/add meta box on restaurants post
+ * Summary. display/add meta box on restaurants post
+ * 
+ * Description.
+ *  Function to add contact number meta box into restaurant post type.
+ * 
+ * @since Unknown
  * @param array $post
  */
 function rt_restaurant_add_contactno_meta_box($post) {
+    // Output buffering start
     ob_start();
     $restaurant_contact = "";
+    
+    // Retriving contact number of restaurant
     $val = get_post_meta($post->ID, '_restaurant_contactno', true);
+    
+    // Check if contact number is already exists for restaurant
     if ($val != NULL && !empty($val)) {
         $restaurant_contact = $val;
     }
     echo "<input type='text' id='contact-no' value='" . $restaurant_contact . "' name='restaurant_contact_no' />";
  
+    // Storing output buffer value into variable and clean output buffer.
     $ob_contactno=  ob_get_clean();
     
-    //filter for user define html of restaurant contact number
+     /**
+     * Summary. Filter for Change in contact number meta box
+     *
+     * Description.
+     *  This filter will allow user to change display of post meta contact number
+      * 
+     * @since Unknown
+     *
+     * @param string $var Description. Name of filter
+     * @param string $ob_contactno 
+     */
     $ob_contactno = apply_filters('rt_restaurant_contactno_html',$ob_contactno);
     echo $ob_contactno;
 }
 
-add_action('load-post.php', 'rt_restaurant_timing_metapost');
-add_action('load-post-new.php', 'rt_restaurant_timing_metapost');
+
+add_action('add_meta_boxes', 'rt_restaurant_add_timing');
+add_action('save_post', 'rt_restaurant_save_timing');
 
 /**
- * add and save timing meta post for restaurant post type
- */
-function rt_restaurant_timing_metapost() {
-    add_action('add_meta_boxes', 'rt_restaurant_add_timing');
-    add_action('save_post', 'rt_restaurant_save_timing');
-}
-
-/**
- * add meta box for timing
+ * Summary.   add meta box for timing
+ *
+ * @since Unknown
  */
 function rt_restaurant_add_timing() {
     add_meta_box(
@@ -383,10 +483,17 @@ function rt_restaurant_add_timing() {
 }
 
 /**
- * add timing meta box on restaurant post display
+ * Summary. add timing meta box on restaurant post display
+ *
+ * Description.
+ *  add timing meta box.
+ *
+ * @since Unknown
  * @param int $post
  */
 function rt_restaurant_add_timing_meta_box($post) {
+    
+    // Output buffer starts
     ob_start();
     ?>
     <form name="restaurant_timing">
@@ -398,9 +505,12 @@ function rt_restaurant_add_timing_meta_box($post) {
             </tr>
             <?php
             $time = get_post_meta($post->ID, '_timing', true);
+            
             $days = array("mon" => "Monday", "tue" => "Tuesday", "wed" => "Wednesday", "thu" => "Thursday", "fri" => "Friday", "sat" => "Saturday", "sun" => "Sunday");
             foreach ($days as $key => $day) {
                 $am = $pm = NULL;
+                
+                // Check if time is not already set for restaurant
                 if (!empty($time) && is_array($time)) {
                     if ($time[0][$key][0] != NULL) {
                         $am = $time[0][$key][0];
@@ -421,25 +531,40 @@ function rt_restaurant_add_timing_meta_box($post) {
         </table>
     </form>
     <?php
+    
+    // Storing output buffer data into variable
     $ob_timing_working_days=  ob_get_clean();
     
-    //filter for user define html for timing and working days
+     /**
+     * Summary. Filter for display change of working days meta box.
+     *
+     * Description.
+     *  This filter will allow user to change display of working days and time on admin side by passing html text as arguments. 
+     *
+     * @since Unknown
+     *
+     * @param string $var Description. name of filter
+     * @param string $ob_timing_working_days
+     */
     $ob_timing_working_days = apply_filters('rt_restaurant_timing_working_days_html',$ob_timing_working_days);
     echo $ob_timing_working_days;
 }
 
 /**
- * save timing postmeta for restaurant
+ * Summary. save timing postmeta for restaurant
+ * 
+ * Description.
+ *  Function to save time and close days.
+ * 
+ * @since Unknown
  * @param int $post_id
  */
 function rt_restaurant_save_timing($post_id) {
     if (isset($_POST['time'])) {
         $time = array($_POST['time']);
         
-        //apply filter for restaurant timing
-        $time = apply_filters('rt_restaurant_time',$time);
-        
         update_post_meta($post_id, '_timing', $time);
+        // Computing close days
         $close_days = array();
         $i = 0;
         foreach ($time[0] as $key => $day) {
@@ -448,7 +573,17 @@ function rt_restaurant_save_timing($post_id) {
             }
         }
         
-        //filter for close days of restaurants
+        /**
+        * Summary. Filter for close day calculation
+        *
+        * Description.
+        *   This filter help user to make change in close day calculation code   
+        * 
+        * @since Unknown
+        *
+        * @param string $var        Description. name of filter
+        * @param string $close_days Description. text change in close day calculation 
+        */
         $close_days = apply_filters('rt_restaurant_close_days' , $close_days);
         update_post_meta($post_id, '_close_days', $close_days);
     }
@@ -457,38 +592,61 @@ function rt_restaurant_save_timing($post_id) {
 add_action('wp_enqueue_scripts', 'rt_restaurant_add_css_js');
 
 /**
- * enqueue css for restaurant post type
+ * Summary.   enqueue css for restaurant post type
+ *
+ * @since Unknown.
  */
 function rt_restaurant_add_css_js() {
+    $template_directory_uri = get_template_directory_uri() ;
+    
     wp_enqueue_script('jquery');
     wp_localize_script('jquery', 'ajax_object', admin_url('admin-ajax.php'));
 
-    wp_enqueue_style("restaurants_css", get_template_directory_uri() . '/restaurant.css');
-    wp_enqueue_style("Slick_css", get_template_directory_uri() . '/slick/slick.css');
-    wp_enqueue_style("Slick_theme_css", get_template_directory_uri() . '/slick/slick-theme.css');
+    // Enqueuing styles 
+    wp_enqueue_style("restaurants_css", $template_directory_uri . '/restaurant.css');
+    wp_enqueue_style("Slick_css", $template_directory_uri . '/slick/slick.css');
+    wp_enqueue_style("Slick_theme_css", $template_directory_uri . '/slick/slick-theme.css');
 
-    wp_register_script('slick-js1', get_template_directory_uri() . '/slick/slick.min.js');
+    // Registering slick script
+    wp_register_script('slick-js1', $template_directory_uri . '/slick/slick.min.js');
     wp_enqueue_script('slick-js1');
 
-    wp_register_script('jquery-migrate-js', get_template_directory_uri() . '/js/jquery-migrate-1.2.1.min.js');
+    wp_register_script('jquery-migrate-js', $template_directory_uri . '/js/jquery-migrate-1.2.1.min.js');
     wp_enqueue_script('jquery-migrate-js');
  
-    wp_register_script('slider-js', get_template_directory_uri() . '/js/restaurants.js');
+    // Registering restaurant js
+    wp_register_script('slider-js', $template_directory_uri . '/js/restaurants.js');
     wp_enqueue_script('slider-js');
 }
 
-/**
- * Review field add, save review and display review
- */
+
 add_filter('comment_form_defaults', 'rt_restaurant_default_fields');
 
+/**
+ * Summary.   Review field add, save review and display review
+ *
+ * Description.
+ *  Function to change default fields of comment by providing them in array.
+ * 
+ * @since Unknown
+ */
 function rt_restaurant_default_fields() {
     $default ['comment_field'] = '<p class="comment-form-comment"><label for="Review">' . _x('Review', 'noun') . '</label> <br />'
             . '<textarea id="review_area" name="comment" cols="20" rows="5" width=50% aria-required="true" required="required"></textarea></p>';
     $default ['title_reply'] = __('Review Us');
     $default ['label_submit'] = __('Post Review');
     
-    //filter for default comment fields
+     /**
+     * Summary. Filter for change in default fields of comment
+     *
+     * Description.
+     *  This filter will help user to change default fields of comment by providing them in array.  
+     * 
+     * @since Unknown
+     *
+     * @param string  $var     Description. name of filter
+     * @param array   $default Description. array for default fields of comment.
+     */
     $default = apply_filters('rt_restaurant_default_comment_fields', $default);
     
     return $default;
@@ -497,8 +655,12 @@ function rt_restaurant_default_fields() {
 add_filter('comment_form_default_fields', 'rt_restaurant_custom_fields');
 
 /**
- * add fields to review
- * @return string
+ * Summary.   add fields to review.
+ *
+ * Description.
+ *  Function to add custom fields in comment of custom post.
+ * 
+ * @since Unknown
  */
 function rt_restaurant_custom_fields() {
     $commenter = wp_get_current_commenter();
@@ -517,7 +679,17 @@ function rt_restaurant_custom_fields() {
             '<input id="email" name="email" type="text" value="' . esc_attr($commenter['comment_author_email']) .
             '" size="30" ' . $aria_req . ' /></p>';
 
-    //filter for custom fields in comment
+     /**
+     * Summary. filter for custom fields of comment
+     *
+     * Description.
+     *  This filter will help user to add custom fields in comment of custom post
+      * 
+     * @since Unknown
+     *
+     * @param string  $var Description. name of filter
+     * @param array $fields Description. array of custom fields for comment
+     */
     $fields = apply_filters('rt_restaurant_custom_comment_fields',$fields);
     
     return $fields;
@@ -527,9 +699,15 @@ add_action('comment_form_logged_in_after', 'rt_restaurant_additional_fields');
 add_action('comment_form_after_fields', 'rt_restaurant_additional_fields');
 
 /**
- * Add field of rating in review
+ * Summary. Add field of rating in review
+ *
+ * Description.
+ *  This function add rating form to Review.
+ * 
+ * @since Unknown
  */
 function rt_restaurant_additional_fields() {
+    // Output buffer starts
     ob_start();
     echo '<p class="comment-form-rating">' .
     '<label for="rating">' . __('Rating') . '<span class="required">*</span></label>
@@ -538,10 +716,22 @@ function rt_restaurant_additional_fields() {
     for ($i = 1; $i <= 5; $i++)
         echo '<span class="commentrating"><input type="radio" name="rating" id="rating" value="' . $i . '"/> ' . $i . '</span>';
 
-    echo'</span></p>';
+    echo'</span>\n</p>';
+    
+    // Storing output buffer value into variable and clean it.
     $ob_rating=  ob_get_clean();
     
-    //filter for user define html for rating
+     /**
+     * Summary. change html of additional fields.
+     *
+     * Description.
+     *  This filter will help user to change in display of additional fields of comments
+     * 
+     * @since Unknown
+     *
+     * @param string $var Description. name of the filter
+     * @param string $ob_rating
+     */
     $ob_rating = apply_filters('rt_restaurant_rating_html',$ob_rating);
     echo $ob_rating;
 }
@@ -549,7 +739,12 @@ function rt_restaurant_additional_fields() {
 add_action('comment_post', 'rt_restaurant_save_comment_meta_data');
 
 /**
- * Save the comment meta data along with comment
+ * Summary. Add amd Save the comment meta rating along with comment
+ *
+ * Description.
+ *  This function will add comment meta rating and save to comment. 
+ * 
+ * @since Unknown
  * @param int $comment_id
  */
 function rt_restaurant_save_comment_meta_data($comment_id) {
@@ -560,31 +755,51 @@ function rt_restaurant_save_comment_meta_data($comment_id) {
     rt_restaurant_add_transient_rating($comment_id);
 }
 
-/**
- * To check that rating is given or not
- */
+
 add_filter('preprocess_comment', 'rt_restaurant_verify_comment_meta_data');
 
+/**
+ * Summary. To check that rating is given or not
+ *
+ * Description.
+ *  This function will check if reviwer has also give rating to restaurant.
+ * @since Unknown
+ * 
+ * @param array commentdata
+ */
 function rt_restaurant_verify_comment_meta_data($commentdata) {
     if (!isset($_POST['rating']))
         wp_die(__('Error: You did not add a rating. Hit the Back button on your Web browser and resubmit your comment with a rating.'));
     return $commentdata;
 }
 
-/**
- *  Add an edit option to comment editing screen  
- */
+
 add_action('add_meta_boxes_comment', 'rt_restaurant_extend_comment_add_meta_box');
 
+/**
+ *  Summary. Add an comment meta box of rating
+ *
+ * Description.
+ *  add comment meta box for rating of restaurant.
+ *
+ * @since Unknown
+ */
 function rt_restaurant_extend_comment_add_meta_box() {
     add_meta_box('title', __('Comment Metadata - Extend Comment'), 'rt_restaurant_extend_comment_meta_box', 'comment', 'normal', 'high');
 }
 
 /**
- * edit comment meta box 
+ * Summary. edit comment meta box. 
+ *
+ * Description.
+ *  This function will extend comment of custom post type restaurants.
+ *  
+ * @since Unknown
+ * 
  * @param array $comment
  */
 function rt_restaurant_extend_comment_meta_box($comment) {
+    // Output buffer starts
     ob_start();
     $rating = get_comment_meta($comment->comment_ID, 'rating', true);
     wp_nonce_field('extend_comment_update', 'extend_comment_update', false);
@@ -603,18 +818,37 @@ function rt_restaurant_extend_comment_meta_box($comment) {
         </span>
     </p>
     <?php
+    // Store output buffer value into variable and clean it.
     $ob_rating_display_edit=  ob_get_clean();
     
-    //filter for user define html for rating display in edit screen
+     /**
+     * Summary. change display of rating
+     *
+     * Description.
+      *     user can change display of rating by this filter. output will store in $ob_rating_display_edit variable.
+     *
+     * @since Unknown
+     *
+     * @param string  $var .
+     * @param string $ob_rating_display_edit 
+     */
     $ob_rating_display_edit = apply_filters('rt_restaurant_rating_display_edit_html',$ob_rating_display_edit);
     echo $ob_rating_display_edit;
 }
 
-/**
- * Update comment meta data from comment editing screen 
- */
+
 add_action('edit_comment', 'rt_restaurant_extend_comment_edit_metafields');
 
+/**
+ * Summary. Update comment meta data from comment editing screen 
+ *
+ * Description.
+ *  This function will add or update new comment.
+ * 
+ * @since Unknown
+ *
+ * @param int $comment_id
+ */
 function rt_restaurant_extend_comment_edit_metafields($comment_id) {
     if (!isset($_POST['extend_comment_update']) || !wp_verify_nonce($_POST['extend_comment_update'], 'extend_comment_update'))
         return;
@@ -629,7 +863,12 @@ function rt_restaurant_extend_comment_edit_metafields($comment_id) {
 }
 
 /**
- * Scripts add for map
+ * Summary.   Scripts add for map
+ *
+ * Description.
+ *  This function will add Google map script.
+ * 
+ * @since Unknown
  */
 add_action('get_footer', 'rt_restaurant_javascript_maps');
 
@@ -640,19 +879,25 @@ function rt_restaurant_javascript_maps() {
 }
 
 /**
- * photo gallery
+ * photo gallery code
  */
 add_theme_support('post-thumbnails', array('restaurants'));
 set_post_thumbnail_size(50, 50);
 add_image_size('single-post-thumbnail', 400, 9999);
 
 /**
- * Display review of restaurants
- * @param array $review
+ * Summary. Display review of restaurants
+ *
+ * Description.
+ *  This function will display custom review display code for restaurant post type.
+ * @since Unknown
+ * 
+ * @param array $review Description. Array of comments
  * @param string $args
  * @param int $depth
  */
 function rt_restaurants_reviews_html($review, $args, $depth){
+    // Output buffer starts
     ob_start();
     
     $GLOBALS['comment'] = $review;
@@ -667,6 +912,7 @@ function rt_restaurants_reviews_html($review, $args, $depth){
     ?>
     <fieldset id="div-comment-<?php comment_ID() ?>" class="comment-body" itemprop="review" itemscope itemtype="http://schema.org/Review">
         <legend class="comment-author" itemprop="author">
+            <!-- display avatar of reviewer -->
             <?php if ( $args['avatar_size'] != 0 ) echo get_avatar( $review, $args['avatar_size'] ); ?>
             <?php echo  get_comment_author_link() ; ?>
         </legend>
@@ -687,6 +933,7 @@ function rt_restaurants_reviews_html($review, $args, $depth){
                     <?php echo $review->comment_content; ?>
                 </div>
                 <?php
+                    // fetching rating value for review
                     $commentrating = get_comment_meta(get_comment_ID(), 'rating', true);
                 ?>
                 <p class="comment-rating" itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
@@ -704,17 +951,33 @@ function rt_restaurants_reviews_html($review, $args, $depth){
     </fieldset>
     <?php
     
+    // Store output buffer into variable and clean it
     $ob_review_all=  ob_get_clean();
     
-    //filter for user define html for all review display
+     /**
+     * Summary. Allow to change review display
+     *
+     * Description.
+     *      User can change display of reviews by using this filter. Add output string into $ob_review_all variable.
+     *
+     * @since Unknown
+     *
+     * @param string  $var 
+     * @param string $ob_review_all  
+     */
     $ob_review_all = apply_filters('rt_restaurant_review_display',$ob_review_all);
     echo $ob_review_all;
 }
 
 /**
- * Set transient to store ratting and postmeta to store average
+ * Summary. Set transient to store ratting and postmeta to store average
+ *
+ * Description.
+ *  This function will create transient to store ratting total and total count of comment. It also create or update 
+ *      restaurant_ratting post meta.
+ * @since Unknown
+ * @param int $comment_id Description. Current comment id
  */
-
 function rt_restaurant_add_transient_rating($comment_id) {
     echo $comment_id;
     $comments = get_comments($comment_id);
@@ -722,6 +985,8 @@ function rt_restaurant_add_transient_rating($comment_id) {
     $cnt = 0;
     $postid=$comments[0] -> comment_post_ID ;
     $comments = get_comments($postid);
+    
+    // Add rating of every review and count reviews
     foreach ($comments as $cm) {
         $rating+= get_comment_meta($cm->comment_ID, 'rating', true);
         $cnt+=1;
