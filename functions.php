@@ -167,6 +167,11 @@ add_action('init', 'rt_restaurant_create_post_type');
  *  This function will add one or more custom post types.
  * 
  * @since Unknown
+ * 
+ * @var array   $labels         labels for custom post type
+ * @var array   $taxonomy       taxonomies for custom post type
+ * @var array   $args           arguments for custom post type
+ * @var string  $new_post_types new post type to register
  */
 function rt_restaurant_create_post_type() {
     // Array of labels for restaurant post type
@@ -250,6 +255,10 @@ add_action('init', 'rt_restaurant_reg_taxonomy');
  *  This function will register one more taxonomy for custom post type.
  * 
  * @since Unknown
+ * 
+ * @var array   $taxonomy   taxonomy to register
+ * @var array   $args       arguments of taxonomy
+ * @var string  $post_type  post type for taxonomy
  */
 function rt_restaurant_reg_taxonomy() {
     // Array of taxomy name and label to register.
@@ -325,6 +334,8 @@ function rt_restaurant_add_address() {
  * @since Unknown
  * 
  * @param int $post_id  
+ * 
+ * @var array   $address    address of restaurant
  */
 function rt_restaurant_save_address($post_id) {
     if (isset($_POST['restaurant_add'])) {
@@ -342,6 +353,10 @@ function rt_restaurant_save_address($post_id) {
  * @since Unknown
  * 
  * @param array $post
+ * 
+ * @var array   $addr       array for address fields
+ * @var array   $add        current existing address
+ * @var string  $ob_address output buffer value
  */
 function rt_restaurant_add_address_meta_box($post) {
     // output buffer start
@@ -406,7 +421,10 @@ add_action('save_post', 'rt_restaurant_save_contactno');
  *  This function will add or update post meta of contact number of restaurants.
  * 
  * @since Unknown
+ * 
  * @param int $post_id
+ * 
+ * @var int $contactno  contact number of restaurant
  */
 function rt_restaurant_save_contactno($post_id) {
     if (isset($_POST['restaurant_contact_no'])) {
@@ -433,7 +451,12 @@ function rt_restaurant_add_contactno() {
  *  Function to add contact number meta box into restaurant post type.
  * 
  * @since Unknown
+ * 
  * @param array $post
+ * 
+ * @var int     $restaurant_contact contact number
+ * @var int     $val                current existing contact number
+ * @var string  $ob_contactno       output buffer value
  */
 function rt_restaurant_add_contactno_meta_box($post) {
     // Output buffering start
@@ -489,7 +512,12 @@ function rt_restaurant_add_timing() {
  *  add timing meta box.
  *
  * @since Unknown
+ * 
  * @param int $post
+ * 
+ * @var array   $time                   current time of restaurant
+ * @var array   $days                   array for key and name of days
+ * @var string  $ob_timing_working_days output buffer value
  */
 function rt_restaurant_add_timing_meta_box($post) {
     
@@ -557,7 +585,11 @@ function rt_restaurant_add_timing_meta_box($post) {
  *  Function to save time and close days.
  * 
  * @since Unknown
+ * 
  * @param int $post_id
+ * 
+ * @var array   $time       time data for current post
+ * @var array   $close_days close days for restaurant
  */
 function rt_restaurant_save_timing($post_id) {
     if (isset($_POST['time'])) {
@@ -567,6 +599,7 @@ function rt_restaurant_save_timing($post_id) {
         // Computing close days
         $close_days = array();
         $i = 0;
+        
         foreach ($time[0] as $key => $day) {
             if ($day[0] == NULL && $day[1] == NULL) {
                 $close_days[$i++] = ($key);
@@ -595,6 +628,8 @@ add_action('wp_enqueue_scripts', 'rt_restaurant_add_css_js');
  * Summary.   enqueue css for restaurant post type
  *
  * @since Unknown.
+ * 
+ * @var string  $template_directory_uri stores current template directory uri
  */
 function rt_restaurant_add_css_js() {
     $template_directory_uri = get_template_directory_uri() ;
@@ -629,6 +664,8 @@ add_filter('comment_form_defaults', 'rt_restaurant_default_fields');
  *  Function to change default fields of comment by providing them in array.
  * 
  * @since Unknown
+ * 
+ * @var array   $default    default fields of review
  */
 function rt_restaurant_default_fields() {
     $default ['comment_field'] = '<p class="comment-form-comment"><label for="Review">' . _x('Review', 'noun') . '</label> <br />'
@@ -661,6 +698,11 @@ add_filter('comment_form_default_fields', 'rt_restaurant_custom_fields');
  *  Function to add custom fields in comment of custom post.
  * 
  * @since Unknown
+ * 
+ * @var array   $commenter  current commentor data
+ * @var boolean $req        fields require value
+ * @var boolean $aria_req   set value for area required or not
+ * @var array   $fields     custom fields for review 
  */
 function rt_restaurant_custom_fields() {
     $commenter = wp_get_current_commenter();
@@ -705,6 +747,8 @@ add_action('comment_form_after_fields', 'rt_restaurant_additional_fields');
  *  This function add rating form to Review.
  * 
  * @since Unknown
+ * 
+ * @var string  $ob_rating  output buffer value
  */
 function rt_restaurant_additional_fields() {
     // Output buffer starts
@@ -745,7 +789,10 @@ add_action('comment_post', 'rt_restaurant_save_comment_meta_data');
  *  This function will add comment meta rating and save to comment. 
  * 
  * @since Unknown
+ * 
  * @param int $comment_id
+ * 
+ * @var int $rating rating value of particular review
  */
 function rt_restaurant_save_comment_meta_data($comment_id) {
     if (( isset($_POST['rating']) ) && ( $_POST['rating'] != ''))
@@ -797,6 +844,9 @@ function rt_restaurant_extend_comment_add_meta_box() {
  * @since Unknown
  * 
  * @param array $comment
+ * 
+ * @var int     $rating                 rating value of review
+ * @var sting   $ob_rating_display_edit output buffer value
  */
 function rt_restaurant_extend_comment_meta_box($comment) {
     // Output buffer starts
@@ -848,6 +898,8 @@ add_action('edit_comment', 'rt_restaurant_extend_comment_edit_metafields');
  * @since Unknown
  *
  * @param int $comment_id
+ * 
+ * @var int $rating rating of restaurant
  */
 function rt_restaurant_extend_comment_edit_metafields($comment_id) {
     if (!isset($_POST['extend_comment_update']) || !wp_verify_nonce($_POST['extend_comment_update'], 'extend_comment_update'))
@@ -895,6 +947,11 @@ add_image_size('single-post-thumbnail', 400, 9999);
  * @param array $review Description. Array of comments
  * @param string $args
  * @param int $depth
+ * 
+ * @var string  $tag            for html tag
+ * @var string  $add_below      html tag class
+ * @var int     $commentrating  rating for review
+ * @var string  $ob_review_all  output buffer value
  */
 function rt_restaurants_reviews_html($review, $args, $depth){
     // Output buffer starts
@@ -976,26 +1033,47 @@ function rt_restaurants_reviews_html($review, $args, $depth){
  *  This function will create transient to store ratting total and total count of comment. It also create or update 
  *      restaurant_ratting post meta.
  * @since Unknown
+ * 
  * @param int $comment_id Description. Current comment id
+ * 
+ * @var array   $comment        current review data
+ * @var array   $total_comments total reviews for restaurant
+ * @var array   $args           arguments for fetching all reviews
+ * @var int     $rating         total rating for restaurant
+ * @var int     $cnt            Total number of ratings
+ * @var float   $average        average rating for restaurant
+ * @var array   $transient_args arguments for transient
+ * 
  */
 function rt_restaurant_add_transient_rating($comment_id) {
-    echo $comment_id;
-    $comments = get_comments($comment_id);
+    $comment = get_comment($comment_id);
+
+    $total_comments = get_comments_number($comment->comment_post_ID);
+    $args = array(
+        'post_id' => $comment->comment_post_ID
+    );
+
+    // Retrives all comments for current post
+    $comments = get_comments($args);
     $rating = 0;
     $cnt = 0;
-    $postid=$comments[0] -> comment_post_ID ;
-    $comments = get_comments($postid);
-    
-    // Add rating of every review and count reviews
-    foreach ($comments as $cm) {
-        $rating+= get_comment_meta($cm->comment_ID, 'rating', true);
-        $cnt+=1;
+    foreach ($comments as $cmnts) {
+        //retrieves rating from each comment and adds it to the $total_rating
+        $rating += get_comment_meta($cmnts->comment_ID, 'rating', true);
+        $cnt += 1;
     }
-    $value = array("postID" => 0, "sum" => 0, "count" => 0);
-    $value["postID"] = $postid;
-    $value["sum"] = $rating;
-    $value["count"] = $cnt;
-    set_transient('_site_transient_rating_sum_count-'.$postid, $value, 0);
-    $rating= $rating / $cnt;
-    update_post_meta($postid, '_restaurant_ratting', intval($rating));
+    $average = intval($rating / $total_comments);
+
+    echo $average;
+
+    $transient_args = array(
+        'post_id' => $comment->comment_post_ID,
+        'count' => $total_comments,
+        'rating' => $rating
+    );
+
+    set_transient('average_rating', $transient_args);
+    
+    // Post meta for average rating
+    update_post_meta($comment->comment_post_ID, '_average_rating', $average);
 }
